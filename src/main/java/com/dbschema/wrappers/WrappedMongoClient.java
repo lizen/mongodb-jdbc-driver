@@ -1,6 +1,18 @@
 package com.dbschema.wrappers;
 
+import static com.dbschema.MongoJdbcDriver.LOGGER;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Level;
+
+import org.bson.Document;
+
 import com.dbschema.ScanStrategy;
+import com.dbschema.Util;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
@@ -11,12 +23,6 @@ import com.mongodb.event.ServerHeartbeatFailedEvent;
 import com.mongodb.event.ServerHeartbeatStartedEvent;
 import com.mongodb.event.ServerHeartbeatSucceededEvent;
 import com.mongodb.event.ServerMonitorListener;
-import org.bson.Document;
-
-import java.util.*;
-import java.util.logging.Level;
-
-import static com.dbschema.MongoJdbcDriver.LOGGER;
 
 /**
  * Copyright Wise Coders Gmbh. BSD License-3. Free to use, distribution forbidden. Improvements of the driver accepted only in https://bitbucket.org/dbschema/mongodb-jdbc-driver.
@@ -46,12 +52,21 @@ public class WrappedMongoClient {
     }
 
 
-    public WrappedMongoClient(String uri, final Properties prop, final ScanStrategy scanStrategy, boolean expandResultSet ){
-        final MongoClientOptions.Builder builder = MongoClientOptions.builder().
-                addServerMonitorListener(new LocalServerMonitorListener());
+    public WrappedMongoClient(String uri, final Properties prop, final ScanStrategy scanStrategy, boolean expandResultSet ) {
+        MongoCredential credential = null;
+        String username = prop.getProperty("user");
+        String password = prop.getProperty("password");
+
+        if (!Util.isNullOrEmpty(username) && !Util.isNullOrEmpty(password)) {
+            String databaseName = prop.getProperty("authSource", "admin");
+            credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
+        }
+
+        final MongoClientOptions.Builder builder = MongoClientOptions.builder()
+                .addServerMonitorListener(new LocalServerMonitorListener());
         final MongoClientURI clientURI = new MongoClientURI(uri, builder);
         this.databaseName = clientURI.getDatabase();
-        this.mongoClient = new MongoClient(clientURI );
+        this.mongoClient = new MongoClient(clientURI);
         this.uri = uri;
         this.expandResultSet = expandResultSet;
         this.scanStrategy = scanStrategy;

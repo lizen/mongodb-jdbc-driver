@@ -1,13 +1,14 @@
 package com.dbschema;
 
-import org.bson.Document;
-
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.bson.Document;
+import org.jetbrains.annotations.Nullable;
 
 public class Util {
 
@@ -86,5 +87,9 @@ public class Util {
             return String.valueOf(bsonTypeObj);
         }
     }
+
+    public static boolean isNullOrEmpty(@Nullable String value) {
+        return value == null || value.isEmpty();
+      }
 
 }
