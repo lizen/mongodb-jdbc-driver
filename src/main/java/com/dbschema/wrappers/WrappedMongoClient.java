@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 
@@ -60,6 +62,14 @@ public class WrappedMongoClient {
         if (!Util.isNullOrEmpty(username) && !Util.isNullOrEmpty(password)) {
             String databaseName = prop.getProperty("authSource", "admin");
             credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
+        }
+
+        String regexPattern = "mongodb://[a-zA-Z0-9.]*:{1}";
+        Pattern pattern = Pattern.compile(regexPattern);
+        Matcher matcher = pattern.matcher(uri);
+
+        while (matcher.find()) {
+            uri = uri.replace("mongodb://", String.format("mongodb://%s:%s@", username, password));
         }
 
         final MongoClientOptions.Builder builder = MongoClientOptions.builder()

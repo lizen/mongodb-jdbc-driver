@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -45,15 +46,28 @@ public class DatabaseMetadataTest {
     Properties properties = new Properties();
 
     //
-    String url = "jdbc:mongodb://sample:sample@192.168.4.82:27017/sampledb?authSource=sampledb&authMechanism=SCRAM-SHA-1&ssl=false";
+    //String url = "jdbc:mongodb://sample:sample@192.168.4.82:27017/sampledb?authSource=sampledb&authMechanism=SCRAM-SHA-1&ssl=false";
     //
+    String driverClass = "com.dbschema.MongoJdbcDriver";
 
-    properties.setProperty("authSource", "sampledb");
-    properties.setProperty("authMechanism", "SCRAM-SHA-1");
-    properties.setProperty("ssl", "false");
-    connection = new MongoJdbcDriver().connect(url, properties);
+    String url = "jdbc:mongodb://localhost:27017/sampledb?authSource=sampledb&authMechanism=SCRAM-SHA-1&ssl=false";
 
-    //connection = new MongoJdbcDriver().connect(URL, properties);
+    try {
+        Class.forName(driverClass);
+        connection = DriverManager.getConnection(url, "sample", "sample");
+
+//        properties.setProperty("authSource", "sampledb");
+//        properties.setProperty("authMechanism", "SCRAM-SHA-1");
+//        properties.setProperty("ssl", "false");
+//        properties.setProperty("ssl", "false");
+//        properties.setProperty("ssl", "false");
+//        connection = new MongoJdbcDriver().connect(URL, properties);
+
+    } catch (ClassNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
+
 
   }
 
@@ -134,7 +148,7 @@ public class DatabaseMetadataTest {
 
         connection.createStatement().execute("use sampledb");
         connection.createStatement().execute("db.central_park_weather.find({tmax: 16})");
-        ResultSet columns = connection.getMetaData().getColumns("", "sampledb", "sampledb.central\\_park\\_weather", "%");
+        ResultSet columns = connection.getMetaData().getColumns(catalogNm, "sampledb", "sampledb.central\\_park\\_weather", "%");
 
       assertTrue(columns.next());
       assertEquals("my_database", columns.getString(2));
