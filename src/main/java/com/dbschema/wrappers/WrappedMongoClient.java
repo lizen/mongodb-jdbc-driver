@@ -62,14 +62,14 @@ public class WrappedMongoClient {
         if (!Util.isNullOrEmpty(username) && !Util.isNullOrEmpty(password)) {
             String databaseName = prop.getProperty("authSource", "admin");
             credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
-        }
 
-        String regexPattern = "mongodb://[a-zA-Z0-9.]*:{1}";
-        Pattern pattern = Pattern.compile(regexPattern);
-        Matcher matcher = pattern.matcher(uri);
+            String regexPattern = "mongodb://[a-zA-Z0-9.]*:{1}";
+            Pattern pattern = Pattern.compile(regexPattern);
+            Matcher matcher = pattern.matcher(uri);
 
-        while (matcher.find()) {
-            uri = uri.replace("mongodb://", String.format("mongodb://%s:%s@", username, password));
+            while (matcher.find()) {
+                uri = uri.replace("mongodb://", String.format("mongodb://%s:%s@", username, password));
+            }
         }
 
         final MongoClientOptions.Builder builder = MongoClientOptions.builder()
